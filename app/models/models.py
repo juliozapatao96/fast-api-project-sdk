@@ -11,13 +11,21 @@ class Player(Base):
     position = Column(String, nullable=False)
     last_changed_date = Column(Date, nullable=False)
 
+    performances = relationship("Performance", back_populates="player")
+    # Many-to-many relationship between Player and Team tables
+    teams = relationship("Team", secondary="team_player", 
+                         back_populates="players") 
+
 class Performance(Base):
     __tablename__ = "performance"
     performance_id = Column(Integer, primary_key=True, index=True)
     week_number = Column(String, nullable=False)
     fantasy_points = Column(Float, nullable=False)
-    player_id = Column(Integer, ForeignKey("player.player_id"), nullable=False)
     last_changed_date = Column(Date, nullable=False)
+
+    player_id = Column(Integer, ForeignKey("player.player_id"), nullable=False)
+    
+    player = relationship("Player", back_populates="performances")
 
 
 class TeamPlayer(Base):
@@ -33,6 +41,11 @@ class Team(Base):
     last_changed_date = Column(Date, nullable=False)
     league_id = Column(Integer, ForeignKey("league.league_id"))
 
+    league = relationship("League", back_populates="teams")
+    # Many-to-many relationship between Player and Team tables
+    players = relationship("Player", secondary="team_player", 
+                           back_populates="teams")
+
 
 class League(Base):
     __tablename__="league"
@@ -40,3 +53,5 @@ class League(Base):
     league_name = Column(String, nullable=False)
     scoring_type = Column(String, nullable=False)
     last_changed_date = Column(Date, nullable=False)
+
+    teams = relationship("Team", back_populates="league")
