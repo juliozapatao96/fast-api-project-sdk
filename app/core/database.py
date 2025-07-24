@@ -7,7 +7,8 @@ Base = declarative_base()
 DATABASE_URL = "sqlite:///./database/fantasy_data.db"
 
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
+    # check_same_thread -> necesario para que SQLite funcione correctamente en entornos multihilo como FastAPI o aplicaciones web
+    DATABASE_URL, connect_args={"check_same_thread": False} 
 )
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
