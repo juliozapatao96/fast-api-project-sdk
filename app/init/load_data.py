@@ -1,5 +1,3 @@
-import sys
-import os
 import pandas as pd
 from datetime import datetime
 from sqlalchemy.orm import sessionmaker
@@ -68,6 +66,40 @@ def load_csv_data():
         session.commit()
         print(f"{len(player_df)} players cargados")
 
+        # CARGAR PERFORMANCES (depende de players)
+        print("\nCargando performances...")
+        performance_df = pd.read_csv('data/performance_data.csv')
+        
+        for _, row in performance_df.iterrows():
+            performance = Performance(
+                performance_id=row['performance_id'],
+                week_number=str(row['week_number']),
+                fantasy_points=float(row['fantasy_points']),
+                player_id=row['player_id'],
+                last_changed_date=datetime.strptime(row['last_changed_date'], '%Y-%m-%d').date()
+            )
+            session.add(performance)
+        
+        session.commit()
+        print(f"{len(performance_df)} performances cargadas")
+        
+        # TEAM_PLAYER (depende de teams y players)
+        print("\nCargando team_player relationships...")
+        team_player_df = pd.read_csv('data/team_player_data.csv')
+        
+        for _, row in team_player_df.iterrows():
+            team_player = TeamPlayer(
+                team_id=row['team_id'],
+                player_id=row['player_id'],
+                last_changed_date=datetime.strptime(row['last_changed_date'], '%Y-%m-%d').date()
+            )
+            session.add(team_player)
+        
+        session.commit()
+        print(f"{len(team_player_df)} team_player relationships cargadas")
+        
+        print("\n¡Todos los datos cargados exitosamente!")
+
 
     except Exception as e:
         print(f"Error durante la carga: {e}")
@@ -88,10 +120,14 @@ def verify_data_counts():
         league_count = session.query(League).count()
         team_count = session.query(Team).count()
         player_count = session.query(Player).count()
+        performance_count = session.query(Performance).count()
+        team_player_count = session.query(TeamPlayer).count()
 
         print(f"Leagues: {league_count}")
         print(f"Teams: {team_count}")
         print(f"Players: {player_count}")
+        print(f"Performances: {performance_count}")
+        print(f"Team-Player relationships: {team_player_count}")
 
 
     except Exception as e:
@@ -107,6 +143,8 @@ def clear_all_data():
     try:
         print("Limpiando todas las tablas")
 
+        session.query(TeamPlayer).delete()
+        session.query(Performance).delete()
         session.query(Player).delete()
         session.query(Team).delete()
         session.query(League).delete()
