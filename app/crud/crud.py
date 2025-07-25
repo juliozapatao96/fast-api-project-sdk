@@ -59,3 +59,16 @@ def get_teams(db: Session, skip: int = 0, limit: int = 100,
     if league_id: 
         query = query.filter(models.Team.league_id == league_id)
     return query.offset(skip).limit(limit).all()   
+
+#analytics queries
+def get_player_count(db: Session):
+    query = db.query(models.Player)
+    return query.count()
+
+def get_team_count(db: Session):
+    query = db.query(models.Team)
+    return query.count()
+
+def get_league_count(db: Session):
+    query = db.query(models.League)
+    return query.count()
