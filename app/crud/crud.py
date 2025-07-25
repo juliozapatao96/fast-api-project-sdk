@@ -20,3 +20,18 @@ def get_players(db: Session, skip: int = 0, limit: int = 100,
     if last_name:
         query = query.filter(models.Player.last_name == last_name)
     return query.offset(skip).limit(limit).all()
+
+
+def get_performances(db: Session, skip: int = 0, limit: int = 100,
+                min_last_changed_date: date = None,):
+    query = db.query(models.Performance)
+
+    if min_last_changed_date:
+        query = query.filter(
+            models.Performance.last_changed_date >= min_last_changed_date)
+    return query.offset(skip).limit(limit).all()
+
+def get_league(db: Session, league_id: int):
+    return db.query(models.League).filter(
+        models.League.league_id == league_id
+    ).first()
